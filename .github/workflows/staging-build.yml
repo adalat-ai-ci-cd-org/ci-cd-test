@@ -39,10 +39,10 @@ jobs:
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
-          git clone --single-branch --branch alpha https://github.com/adalat-ai-tech/adalat-charts.git second-repo
-          cd second-repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git clone --single-branch --branch alpha https://github.com/adalat-ai-tech/adalat-charts.git second-repo
+          cd second-repo
 
       - name: Update image.tag in values.yaml
         run: |
