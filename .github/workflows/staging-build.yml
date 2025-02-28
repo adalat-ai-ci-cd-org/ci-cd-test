@@ -1,18 +1,19 @@
-name: Bump version
+name: Bump version and update image.tag
+
 on:
   push:
     branches:
       - main
+
 permissions:
   contents: write  # Allows creating and pushing tags 
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug GITHUB_TOKEN
-        run: echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
-      - uses: actions/checkout@v4
       - name: Bump version and push tag
+        uses: actions/checkout@v4
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
@@ -24,3 +25,4 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
+      
