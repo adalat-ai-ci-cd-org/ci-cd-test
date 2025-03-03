@@ -34,6 +34,7 @@ jobs:
 
       - name: Install yq
         run: |
+          ls -la
           sudo apt-get update && sudo apt-get install -y jq
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
@@ -47,6 +48,7 @@ jobs:
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
+          ls -la
           git config user.name "mura108"
           git config user.email "mura@adalat.ai"
           git clone --single-branch --branch alpha https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
