@@ -50,8 +50,6 @@ jobs:
         run: |
           cd ..
           ls -la
-          git config user.name "mura108"
-          git config user.email "mura@adalat.ai"
           git clone --single-branch --branch alpha https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
           cd second-repo
 
