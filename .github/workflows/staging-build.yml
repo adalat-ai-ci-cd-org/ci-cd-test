@@ -47,7 +47,7 @@ jobs:
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
-          git clone --single-branch --branch alpha https://${{ secrets.GITHUB_TOKEN }}@github.com/adalat-ai-tech/adalat-charts.git second-repo
+          git clone --single-branch --branch alpha https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
           cd second-repo
 
       - name: Update image.tag in values.yaml
