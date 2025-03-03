@@ -48,6 +48,7 @@ jobs:
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
+          cd ..
           ls -la
           git config user.name "mura108"
           git config user.email "mura@adalat.ai"
