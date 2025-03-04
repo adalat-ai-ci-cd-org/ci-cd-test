@@ -48,6 +48,7 @@ jobs:
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
+          cd ..
           export GIT_ASKPASS=/bin/true  # Prevent Git from asking for credentials
           git clone --single-branch --branch alpha https://${{ secrets.MY_PAT_SECRET }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
           cd second-repo
