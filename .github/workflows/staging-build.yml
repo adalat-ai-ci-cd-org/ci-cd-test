@@ -50,7 +50,7 @@ jobs:
         run: |
           cd ..
           ls -la
-          git clone --single-branch --branch alpha https://x-access-token:${{ secrets.MY_PAT_SECRET }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
+          git clone --single-branch --branch alpha https://${{ secrets.MY_PAT_SECRET }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
           cd second-repo
 
       - name: Update image.tag in values.yaml
