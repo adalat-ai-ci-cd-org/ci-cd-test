@@ -51,7 +51,7 @@ jobs:
           ls -la ci-cd-test
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
           echo "Updating image.tag to ${NEW_TAG}"
-          yq eval -i '.image.tag = strenv(NEW_TAG)' ci-cd-test/values.yaml
+          yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
       - name: Commit and push changes
