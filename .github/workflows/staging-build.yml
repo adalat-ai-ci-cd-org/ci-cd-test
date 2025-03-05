@@ -39,13 +39,6 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Debug Token Permissions
-        run: |
-          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/adalat-ai-tech/adalat-charts
-
-
       - name: Clone the second repo (where values.yaml exists)
         run: |
           git clone --single-branch --branch alpha https://${{ secrets.MY_PAT_TOKEN }}@github.com/adalat-ai-tech/ci-cd-charts-test.git second-repo
@@ -53,6 +46,7 @@ jobs:
 
       - name: Update image.tag in values.yaml
         run: |
+          ls -la
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
           echo "Updating image.tag to ${NEW_TAG} in second-repo (alpha branch)"
           yq -i ".image.tag = \"${NEW_TAG}\"" second-repo/ci-cd-test/values.yaml
