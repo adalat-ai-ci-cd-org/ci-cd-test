@@ -59,8 +59,8 @@ jobs:
           git config user.email "mura@adalat.ai"
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
           echo "new tag value is ${NEW_TAG}"
-          ls -la ci-cd-test
           cd second-repo
+          ls -la ci-cd-test
           git add ci-cd-test/values.yaml
           git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
           git push origin alpha
