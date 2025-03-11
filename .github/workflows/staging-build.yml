@@ -40,9 +40,33 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
+      - name: Generate GitHub App Token
+        id: generate-token
+        run: |
+          APP_ID=1172473
+          INSTALLATION_ID=62382783
+          PRIVATE_KEY="${{ secrets.CI_CD_SECRET }}"
+
+          jwt=$(ruby <<EOF
+          require 'jwt'
+          payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${1172473} }
+          private_pem = ENV['PRIVATE_KEY'].gsub('\n', "\n")
+          private_key = OpenSSL::PKey::RSA.new(private_pem)
+          token = JWT.encode(payload, private_key, 'RS256')
+          puts token
+          EOF
+          )
+
+          ACCESS_TOKEN=$(curl -s -X POST \
+            -H "Authorization: Bearer $jwt" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" | jq -r '.token')
+
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+
       - name: Clone the second repo (where values.yaml exists)
         run: |
-          git clone --single-branch --branch alpha https://${{ secrets.MY_PAT_TOKEN }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
+          git clone --single-branch --branch alpha https://${{ secrets.CI_CD_SECRET }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
 
       - name: Update image.tag in values.yaml
         run: |
