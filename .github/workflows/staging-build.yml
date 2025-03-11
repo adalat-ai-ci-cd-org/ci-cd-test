@@ -40,6 +40,15 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
+      - name: Debug Secrets
+        run: |
+          if [ -z "${{ secrets.CI_CD_SECRET }}" ]; then
+            echo "ERROR: CI_CD_SECRET is EMPTY!"
+            exit 1
+          else
+            echo "✅ CI_CD_SECRET is SET."
+          fi
+
       - name: Generate GitHub App Token
         id: generate-token
         run: |
