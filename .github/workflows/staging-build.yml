@@ -54,12 +54,15 @@ jobs:
         run: |
           APP_ID=1172473
           INSTALLATION_ID=62382783
-          PRIVATE_KEY=$(echo "${{ secrets.CI_CD_SECRET }}" | awk '{printf "%s\\n", $0}')
 
+          # Convert GitHub Secret to properly formatted private key
+          echo "${{ secrets.CI_CD_SECRET }}" | awk '{printf "%s\\n", $0}' > private-key.pem
+
+          # Generate JWT token using Ruby
           jwt=$(ruby <<EOF
           require 'openssl'
           require 'jwt'
-          private_pem = ENV['PRIVATE_KEY'].gsub('\\n', "\n")
+          private_pem = File.read("private-key.pem")
           private_key = OpenSSL::PKey::RSA.new(private_pem)
           payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${APP_ID} }
           token = JWT.encode(payload, private_key, 'RS256')
@@ -67,12 +70,7 @@ jobs:
           EOF
           )
 
-          ACCESS_TOKEN=$(curl -s -X POST \
-            -H "Authorization: Bearer $jwt" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" | jq -r '.token')
-
-          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+          echo "✅ JWT Token Generated"
 
       - name: Clone the second repo (where values.yaml exists)
         run: |
