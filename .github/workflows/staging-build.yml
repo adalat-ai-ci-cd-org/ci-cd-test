@@ -58,6 +58,9 @@ jobs:
           # Convert GitHub Secret to properly formatted private key
           echo "${{ secrets.CI_CD_SECRET }}" | awk '{printf "%s\\n", $0}' > private-key.pem
 
+          # Verify the key format
+          cat private-key.pem
+
           # Generate JWT token using Ruby
           jwt=$(ruby <<EOF
           require 'openssl'
