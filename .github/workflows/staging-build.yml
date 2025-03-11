@@ -59,6 +59,7 @@ jobs:
           echo "${{ secrets.CI_CD_SECRET }}" | awk '{printf "%s\\n", $0}' > private-key.pem
 
           # Verify the key format
+          echo "Private Key Content:"
           cat private-key.pem
 
           # Generate JWT token using Ruby
