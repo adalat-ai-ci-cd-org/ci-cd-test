@@ -64,7 +64,6 @@ jobs:
           INSTALLATION_ID=62382783
 
           # Convert GitHub Secret to properly formatted private key
-          # printf "%s\n" "${{ secrets.CI_CD_SECRET }}" > private-key.pem
           cat <<EOF > private-key.pem
           -----BEGIN RSA PRIVATE KEY-----
           MIIEpAIBAAKCAQEA2i6KSUIyFa98eNbur/zGOmxkNhOyK42Q1K5Q0xN1n2PqSxxy
