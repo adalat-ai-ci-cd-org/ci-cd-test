@@ -55,6 +55,7 @@ jobs:
           echo "🔍 Checking Private Key Format..."
           head -5 private-key.pem  # Show first 5 lines (should start with -----BEGIN RSA PRIVATE KEY-----)
           tail -5 private-key.pem  # Show last 5 lines (should end with -----END RSA PRIVATE KEY-----)
+          echo "Private Key Length: $(wc -l < private-key.pem) lines"
 
       - name: Generate GitHub App Token
         id: generate-token
