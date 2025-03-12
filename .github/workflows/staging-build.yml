@@ -68,7 +68,7 @@ jobs:
 
           # Verify the key format
           echo "Private Key Content:"
-          cat private-key.pem
+          cat private-key.pem | head -5  # Should show the first 5 lines
           echo "Private Key Content Printed"
 
           # Generate JWT token using Ruby
