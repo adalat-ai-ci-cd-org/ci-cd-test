@@ -56,8 +56,7 @@ jobs:
           INSTALLATION_ID=62382783
 
           # Convert GitHub Secret to properly formatted private key
-          echo "${{ secrets.CI_CD_SECRET }}" > private-key.pem
-
+          printf "%s\n" "${{ secrets.CI_CD_SECRET }}" > private-key.pem
 
           # Verify the key format
           echo "Private Key Content:"
