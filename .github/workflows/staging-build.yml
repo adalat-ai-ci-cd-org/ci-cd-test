@@ -76,6 +76,8 @@ jobs:
           )
 
           echo "✅ JWT Token Generated"
+          echo "JWT Token: $JWT"
+          echo "✅ JWT Token Generated"
 
           # Exchange JWT for an Installation Access Token
           ACCESS_TOKEN=$(curl -s -X POST -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
