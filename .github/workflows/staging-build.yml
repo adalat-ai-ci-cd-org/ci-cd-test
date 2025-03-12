@@ -46,6 +46,7 @@ jobs:
         with:
           app-id: 1172473
           private-key: ${{ secrets.CI_CD_SECRET }}
+          repositories: adalat-ai-ci-cd-org/ci-cd-charts-test
 
       - name: Debug Token Access
         run: |
