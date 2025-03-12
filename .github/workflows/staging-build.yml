@@ -107,6 +107,15 @@ jobs:
             require 'openssl'
             require 'jwt'
             private_pem = File.read("private-key.pem").strip # Removes extra newlines
+            
+            begin
+              private_key = OpenSSL::PKey::RSA.new(private_pem)
+              puts "✅ RSA Key Parsed Successfully!"
+            rescue => e
+              puts "❌ RSA Key Error: #{e.message}"
+              exit(1)
+            end
+
             private_key = OpenSSL::PKey::RSA.new(private_pem)
             payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${APP_ID} }
             token = JWT.encode(payload, private_key, 'RS256')
