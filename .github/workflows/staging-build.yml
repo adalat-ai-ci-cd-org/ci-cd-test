@@ -47,6 +47,13 @@ jobs:
           app-id: 1172473
           private-key: ${{ secrets.CI_CD_SECRET }}
 
+      - name: Debug Token Access
+        run: |
+          echo "Checking token permissions..."
+          curl -H "Authorization: Bearer ${{ steps.generate-token.outputs.token }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/user"
+
       - name: Clone the Second Repo
         run: |
           git clone --single-branch --branch alpha https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
