@@ -63,6 +63,9 @@ jobs:
           APP_ID=1172473
           INSTALLATION_ID=62382783
 
+          echo "APP_ID: $APP_ID"
+          echo "INSTALLATION_ID: $INSTALLATION_ID"
+
           # Convert GitHub Secret to properly formatted private key
           cat <<EOF > private-key.pem
           -----BEGIN RSA PRIVATE KEY-----
