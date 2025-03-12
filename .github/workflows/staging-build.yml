@@ -77,6 +77,13 @@ jobs:
 
           echo "✅ JWT Token Generated"
 
+          # Exchange JWT for an Installation Access Token
+          ACCESS_TOKEN=$(curl -s -X POST -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" | jq -r .token)
+
+          echo "::add-mask::$ACCESS_TOKEN"  # Mask token in logs
+          echo "ACCESS_TOKEN=${ACCESS_TOKEN}" >> $GITHUB_ENV
+
       - name: Clone the second repo (where values.yaml exists)
         run: |
           git clone --single-branch --branch alpha https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
