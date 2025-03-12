@@ -40,95 +40,19 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
-      - name: Debug Secrets
-        run: |
-          if [ -z "${{ secrets.CI_CD_SECRET }}" ]; then
-            echo "ERROR: CI_CD_SECRET is EMPTY!"
-            exit 1
-          else
-            echo "✅ CI_CD_SECRET is SET."
-          fi
-
-      - name: Debug Private Key
-        run: |
-          printf "%s\n" "${{ secrets.CI_CD_SECRET }}" > private-key.pem
-          echo "🔍 Checking Private Key Format..."
-          head -5 private-key.pem  # Show first 5 lines (should start with -----BEGIN RSA PRIVATE KEY-----)
-          tail -5 private-key.pem  # Show last 5 lines (should end with -----END RSA PRIVATE KEY-----)
-          echo "Private Key Length: $(wc -l < private-key.pem) lines"
-
       - name: Generate GitHub App Token
+        uses: actions/create-github-app-token@v1
         id: generate-token
+        with:
+          app-id: 1172473
+          private-key: ${{ secrets.CI_CD_SECRET }}
+
+      - name: Clone the Second Repo
         run: |
-          APP_ID=1172473
-          INSTALLATION_ID=62382783
-
-          echo "APP_ID: $APP_ID"
-          echo "INSTALLATION_ID: $INSTALLATION_ID"
-
-          # Convert GitHub Secret to properly formatted private key
-          cat <<EOF > private-key.pem
-          -----BEGIN RSA PRIVATE KEY-----
-          MIIEpAIBAAKCAQEA2i6KSUIyFa98eNbur/zGOmxkNhOyK42Q1K5Q0xN1n2PqSxxy
-          NYAHLx0+Y56m5OeriFUBeMR6vxTCB1zNBLm53M3XqUQJ+mGArCF/91bKbQfu4q4Z
-          DZgmL5m+fVFktDZazkMAJ1CtSmZdJbBK0bqQ1rJrVsS4VKQXK9/v9h4/mXZBX+AF
-          4LXbEMA3mTUL70AH5gsWM/GO4txw1rGyTLiziNI1syeDL0C9SPwc9OiJOHkHaGyn
-          aHQmtdi6Uq9793arupIUFQDIbxw/4AmYVvdYF1GSX+TMG2dq6XopOLB+qT7HciuT
-          89pGV8fFCUVjcFtHakUyfFWOmnN5biiKvGLibwIDAQABAoIBABr9RNf5G075bVFZ
-          bR9SCodxnxfdad3fXjog8hiaQKOd7X6rHymlE75tRKl4F7cbPWnY8hypWXHHtJTK
-          kwXxn59Dy1jB9OYHJ66jWjwTfWjtYUyjMrAu0RJ0V08TQXzVeHgpa5xxa25XqVAf
-          NbIp/P7CBWsvXIoD3mXsBrgQV9e4waPGE5GDksuzRDZYsxkQFY5FRx+7aQXJ6QuC
-          Zm7gM2ADiodhb+jRz3St+ZSXPQGADIr8dVugzOEEOn9KuM+OguQ8VDjLxRmm7T+s
-          plKot3jIo8iUng1qMIseTYV1L19twN9r/dSv3vqsugJlDCfco0+fut0Bl5YYYBOA
-          7OX/FyECgYEA+J2RP1ZEwh84libnVKNdtzCAdy29JpnIl+t3+45RpPNHPFIcgJWQ
-          sMAdEwMTkhlp2wLb12jiEjrgznI4ymQv54tX5HZj0JmcLCUDR+8wz1KKTbWVQaTZ
-          YP9Bru17PrQSnF2eTL+c7Ss8HwVL7eHBvbl4xb9pKfHH6/QEurIY6b8CgYEA4KmP
-          TzjHCsGn+AttJz8nCk+1dag+jTGF0PrHd7zV0s0HBoynHvLvWnwBay+afwovSVoy
-          mwIfmFKj8LEXGtishuZ3JePEukacT4UHtB4qscWwzHE0pfdaOJvJXgoSlTrEBANg
-          vuS8jbvKf3yplPrKko5AVLc5nQjrhgdS0a9IU1ECgYEAi+efpRTW/Ka1IUojQ+3q
-          /vu8T1Td7Kr9xwArNNSR/VEp9Tf/8hw4oD58HgbNLJpAh47ESCQtlDSt7X85litr
-          CdHQVDCLWwgWaoEpp4Fi5kh8q95Tb+1kpsD+JYJeqJqNHpFQU8BAfvaljo9cezFf
-          5XRKEn30oDX/WzimsKkoe+ECgYB55ocEDWKyy3FAfbK0YOfmCGoFdUy7f+uEAQ7K
-          QYQj5Wuyeg8UE+0bw71hU2sZE4Wk33Ql93j9RZn+t5g50OeMKvDrdjMAf9/ApgYQ
-          DW5NF19fDu3qP9SMcrtIc16x6jkBlHOiIKrOnN67XgEF/S59ZwIw9VolgvmIt+CQ
-          NfOggQKBgQDZyeoXNmAhcvWxPUFj3txleppfYNBLFUaA08t03mtYypdbhiPpJj2R
-          aoOHeJyA/7EVtSpz6+UBVnu209nzPwDFUiK/m7difJYbP7tUqEbXNNwjAUthjDPw
-          5uonCNC2/ALrbzoyb1N/+pNBoGvQWRr4Z8hv3gd03bKPHka9NiMciw==
-          -----END RSA PRIVATE KEY-----
-          EOF
-
-          # Verify the key format
-          echo "Private Key Content:"
-          cat private-key.pem | head -5  # Should show the first 5 lines
-          echo "Private Key Content Printed"
-
-          # Generate JWT token using Ruby
-          jwt=$(ruby <<EOF
-            require 'openssl'
-            require 'jwt'
-            private_pem = File.read("private-key.pem").strip # Removes extra newlines
-  
-            private_key = OpenSSL::PKey::RSA.new(private_pem)
-            payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${APP_ID} }
-            token = JWT.encode(payload, private_key, 'RS256')
-            puts token
-          EOF
-          )
-
-          echo "✅ JWT Token Generated"
-          echo "JWT Token: $JWT"
-          echo "✅ JWT Token Generated"
-
-          # Exchange JWT for an Installation Access Token
-          ACCESS_TOKEN=$(curl -s -X POST -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" | jq -r .token)
-
-          echo "::add-mask::$ACCESS_TOKEN"  # Mask token in logs
-          echo "ACCESS_TOKEN=${ACCESS_TOKEN}" >> $GITHUB_ENV
-
-      - name: Clone the second repo (where values.yaml exists)
-        run: |
-          git clone --single-branch --branch alpha https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
+          git clone --single-branch --branch alpha https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
+          cd second-repo
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Update image.tag in values.yaml
         run: |
@@ -143,25 +67,14 @@ jobs:
       - name: Commit and push changes
         run: |
           cd second-repo
+
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
           echo "new tag value is ${NEW_TAG}"
-          ls -la ci-cd-test
-
-          echo "printing contents of cloned repo"
-          cat ci-cd-test/values.yaml
-          echo "finished printing contents of cloned repo"
-
-          # Set Git identity
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions@github.com"
 
           git add ci-cd-test/values.yaml
           git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
 
-          # Debug authentication token
-          echo "GitHub App Token: ${{ env.ACCESS_TOKEN }}" | sed 's/./& /g'
-
           # Set the correct authentication URL
-          git remote set-url origin https://x-access-token:ghs_rhqUcrrPjR2MCPP9nHy12E7WCBW1MY0HR0VF@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git
           git push origin alpha
-      
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
