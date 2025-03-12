@@ -108,9 +108,16 @@ jobs:
           echo "printing contents of cloned repo"
           cat ci-cd-test/values.yaml
           echo "finished printing contents of cloned repo"
-          
+
+          # Set Git identity
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
           git add ci-cd-test/values.yaml
           git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
+
+          # Debug authentication token
+          echo "GitHub App Token: ${{ env.ACCESS_TOKEN }}" | sed 's/./& /g'
 
           # Set the correct authentication URL
           git remote set-url origin https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git
