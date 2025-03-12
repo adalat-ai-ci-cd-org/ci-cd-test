@@ -54,6 +54,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
+      - name: Configure Git User
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Update image.tag in values.yaml
         run: |
           cd second-repo
@@ -63,6 +68,13 @@ jobs:
           echo "Updating image.tag to ${NEW_TAG}"
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
+
+      - name: Check Authenticated User
+        run: |
+          gh auth status
+          git config --get remote.origin.url
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Commit and push changes
         run: |
@@ -77,4 +89,4 @@ jobs:
           # Set the correct authentication URL
           git push origin alpha
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GIT_ASKPASS: echo "x-access-token:${{ steps.generate-token.outputs.token }}"
