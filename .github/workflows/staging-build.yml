@@ -107,15 +107,7 @@ jobs:
             require 'openssl'
             require 'jwt'
             private_pem = File.read("private-key.pem").strip # Removes extra newlines
-            
-            begin
-              private_key = OpenSSL::PKey::RSA.new(private_pem)
-              puts "✅ RSA Key Parsed Successfully!"
-            rescue => e
-              puts "❌ RSA Key Error: #{e.message}"
-              exit(1)
-            end
-
+  
             private_key = OpenSSL::PKey::RSA.new(private_pem)
             payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${APP_ID} }
             token = JWT.encode(payload, private_key, 'RS256')
@@ -170,6 +162,6 @@ jobs:
           echo "GitHub App Token: ${{ env.ACCESS_TOKEN }}" | sed 's/./& /g'
 
           # Set the correct authentication URL
-          git remote set-url origin https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git
+          git remote set-url origin https://x-access-token:ghs_rhqUcrrPjR2MCPP9nHy12E7WCBW1MY0HR0VF@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git
           git push origin alpha
       
