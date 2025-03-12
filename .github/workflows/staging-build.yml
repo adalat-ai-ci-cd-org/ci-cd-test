@@ -61,6 +61,7 @@ jobs:
           # Verify the key format
           echo "Private Key Content:"
           cat private-key.pem
+          echo "Private Key Content Printed"
 
           # Generate JWT token using Ruby
           jwt=$(ruby <<EOF

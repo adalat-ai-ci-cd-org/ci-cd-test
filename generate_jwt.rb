@@ -1,22 +1,23 @@
+APP_ID=1172473
+INSTALLATION_ID=62382783
+
+# Convert GitHub Secret to properly formatted private key
+echo "${{ secrets.CI_CD_SECRET }}" | awk '{printf "%s\\n", $0}' > private-key.pem
+
+# Verify the key format
+echo "Private Key Content:"
+cat private-key.pem
+
+# Generate JWT token using Ruby
+jwt=$(ruby <<EOF
 require 'openssl'
 require 'jwt'
-
-# Replace with your GitHub App ID
-app_id = 1172473  # Example: 1172473
-
-# Load the private key from the .pem file
-private_pem = File.read("adalat-ci-cd-app.pem")  # Ensure this is the correct path
+private_pem = File.read("private-key.pem")
 private_key = OpenSSL::PKey::RSA.new(private_pem)
+payload = { iat: Time.now.to_i - 60, exp: Time.now.to_i + (10 * 60), iss: ${APP_ID} }
+token = JWT.encode(payload, private_key, 'RS256')
+puts token
+EOF
+)
 
-# JWT payload with issued at and expiration times
-payload = {
-  iat: Time.now.to_i - 60,   # Issued at time (1 min in the past for safety)
-  exp: Time.now.to_i + 600,  # Expiration time (10 minutes from now)
-  iss: app_id                # GitHub App ID
-}
-
-# Generate JWT token
-jwt = JWT.encode(payload, private_key, "RS256")
-
-# Print JWT token
-puts jwt
+echo "✅ JWT Token Generated"
