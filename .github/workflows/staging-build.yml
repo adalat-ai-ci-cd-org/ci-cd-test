@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write  # Allows creating and pushing tags 
   packages: read
+  pull-requests: write 
 
 jobs:
   build:
@@ -89,17 +90,28 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 
-      - name: Commit and push changes
-        run: |
-          cd second-repo
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          commit-message: "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          title: "Automated Update: image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          body: "This PR updates the image tag to `${{ steps.tag_version.outputs.new_tag }}`."
+          branch: ci-cd-update-image-tag
+          delete-branch: true
+          base: alpha
 
-          NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
-          echo "new tag value is ${NEW_TAG}"
+      # - name: Commit and push changes
+      #   run: |
+      #     cd second-repo
 
-          git add ci-cd-test/values.yaml
-          git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
+      #     NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
+      #     echo "new tag value is ${NEW_TAG}"
 
-          # Set the correct authentication URL
-          git push origin alpha
-        env:
-          GIT_ASKPASS: echo "x-access-token:${{ steps.generate-token.outputs.token }}"
+      #     git add ci-cd-test/values.yaml
+      #     git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
+
+      #     # Set the correct authentication URL
+      #     git push origin alpha
+      #   env:
+      #     GIT_ASKPASS: echo "x-access-token:${{ steps.generate-token.outputs.token }}"
