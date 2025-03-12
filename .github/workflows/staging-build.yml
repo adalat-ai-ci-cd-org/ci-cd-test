@@ -104,6 +104,11 @@ jobs:
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
           echo "new tag value is ${NEW_TAG}"
           ls -la ci-cd-test
+
+          echo "printing contents of cloned repo"
+          cat ci-cd-test/values.yaml
+          echo "finished printing contents of cloned repo"
+          
           git add ci-cd-test/values.yaml
           git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
 
