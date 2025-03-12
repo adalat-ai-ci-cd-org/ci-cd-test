@@ -49,6 +49,13 @@ jobs:
             echo "✅ CI_CD_SECRET is SET."
           fi
 
+      - name: Debug Private Key
+        run: |
+          printf "%s\n" "${{ secrets.CI_CD_SECRET }}" > private-key.pem
+          echo "🔍 Checking Private Key Format..."
+          head -5 private-key.pem  # Show first 5 lines (should start with -----BEGIN RSA PRIVATE KEY-----)
+          tail -5 private-key.pem  # Show last 5 lines (should end with -----END RSA PRIVATE KEY-----)
+
       - name: Generate GitHub App Token
         id: generate-token
         run: |
