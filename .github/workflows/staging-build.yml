@@ -47,6 +47,8 @@ jobs:
         with:
           app-id: 1172473
           private-key: ${{ secrets.CI_CD_SECRET }}
+          owner: adalat-ai-ci-cd-org
+          repositories: ci-cd-charts-test
 
       - name: Debug Token Access
         run: |
@@ -61,16 +63,15 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               "https://api.github.com/installation/repositories"
 
-      - name: Clone the Second Repo
-        run: |
-          git clone --single-branch --branch alpha https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/adalat-ai-ci-cd-org/ci-cd-charts-test.git second-repo
-          cd second-repo
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+      - name: Checkout Second Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          repository: adalat-ai-ci-cd-org/ci-cd-charts-test
+          ref: alpha  # Specify the branch if needed
 
       - name: Update image.tag in values.yaml
         run: |
-          cd second-repo
           echo "Current directory: $(pwd)"
           ls -la ci-cd-test
           NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
@@ -78,14 +79,8 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ steps.generate-token.outputs.token }} # necessary if the repo is private
-          repository: owner/repo
-
       - name: Commit and Push Changes
         run: |
-          cd second-repo
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
@@ -99,3 +94,8 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
+          commit-message: "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          branch: "update-image-tag"
+          base: "alpha"
+          title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          body: "This PR updates `image.tag` to `${{ steps.tag_version.outputs.new_tag }}` automatically."
