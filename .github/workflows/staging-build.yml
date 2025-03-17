@@ -47,8 +47,6 @@ jobs:
         with:
           app-id: 1172473
           private-key: ${{ secrets.CI_CD_SECRET }}
-          owner: owner
-          repositories: repo
 
       - name: Debug Token Access
         run: |
