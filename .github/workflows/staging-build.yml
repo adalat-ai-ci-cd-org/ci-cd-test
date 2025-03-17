@@ -79,16 +79,16 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
-      - name: Commit and Push Changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+      # - name: Commit and Push Changes
+      #   run: |
+      #     git config user.name "github-actions"
+      #     git config user.email "github-actions@github.com"
 
-          git add ci-cd-test/values.yaml
-          git commit -m "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}" || echo "No changes to commit"
-          git push origin alpha
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+      #     git add ci-cd-test/values.yaml
+      #     git commit -m "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}" || echo "No changes to commit"
+      #     git push origin alpha
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
