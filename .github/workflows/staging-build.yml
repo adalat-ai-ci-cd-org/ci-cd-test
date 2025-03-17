@@ -110,5 +110,5 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
-          pull-request: ${{ steps.create-pr.outputs.pull-request-number }}
+          pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  
