@@ -50,25 +50,12 @@ jobs:
           owner: adalat-ai-ci-cd-org
           repositories: ci-cd-charts-test
 
-      - name: Debug Token Access
-        run: |
-          echo "Checking token permissions..."
-          curl -H "Authorization: Bearer ${{ steps.generate-token.outputs.token }}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/user"
-
-      - name: Check Token Scope
-        run: |
-          curl -H "Authorization: Bearer ${{ steps.generate-token.outputs.token }}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/installation/repositories"
-
       - name: Checkout Second Repo
         uses: actions/checkout@v4
         with:
           token: ${{ steps.generate-token.outputs.token }}
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test
-          ref: alpha  # Specify the branch if needed
+          ref: alpha 
 
       - name: Update image.tag in values.yaml
         run: |
@@ -79,19 +66,8 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
-      # - name: Commit and Push Changes
-      #   run: |
-      #     git config user.name "github-actions"
-      #     git config user.email "github-actions@github.com"
-
-      #     git add ci-cd-test/values.yaml
-      #     git commit -m "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}" || echo "No changes to commit"
-      #     git push origin alpha
-      #   env:
-      #     GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
       - name: Create Pull Request
-        id:   create-pr  # Ensure this ID exists
+        id: create-pr 
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -100,10 +76,6 @@ jobs:
           base: "alpha"
           title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}"
           body: "This PR updates `image.tag` to `${{ steps.tag_version.outputs.new_tag }}` automatically."
-
-      - name: Debug PR Creation
-        run: |
-          echo "Pull Request Number: ${{ steps.create-pr.outputs.pull-request-number }}"
 
       - name: Enable Auto-Merge
         uses: peter-evans/enable-pull-request-automerge@v3
