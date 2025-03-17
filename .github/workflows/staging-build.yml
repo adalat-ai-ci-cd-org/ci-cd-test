@@ -104,5 +104,5 @@ jobs:
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          pull-request: ${{ steps.create-pr.outputs.pull-request-number }}
+          pull-request: ${{ steps.create-pull-request.outputs.pull-request-number }}
           merge-method: squash  # Options: merge, squash, rebase
