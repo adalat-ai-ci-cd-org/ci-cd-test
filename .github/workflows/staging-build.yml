@@ -47,6 +47,8 @@ jobs:
         with:
           app-id: 1172473
           private-key: ${{ secrets.CI_CD_SECRET }}
+          owner: owner
+          repositories: repo
 
       - name: Debug Token Access
         run: |
@@ -78,14 +80,6 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
-      - uses: actions/create-github-app-token@v1
-        id: generate-token
-        with:
-          app-id: 1172473
-          private-key: ${{ secrets.CI_CD_SECRET }}
-          owner: owner
-          repositories: repo
-
       - uses: actions/checkout@v4
         with:
           token: ${{ steps.generate-token.outputs.token }} # necessary if the repo is private
@@ -100,6 +94,8 @@ jobs:
           git add ci-cd-test/values.yaml
           git commit -m "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}" || echo "No changes to commit"
           git push origin alpha
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
