@@ -109,5 +109,6 @@ jobs:
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ steps.generate-token.outputs.token }}
+          repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
           pull-request: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  # Options: merge, squash, rebase
