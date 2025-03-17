@@ -68,11 +68,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
-      - name: Configure Git User
-        run: |
-          git config --global user.name "mura108"
-          git config --global user.email "mura@adalat.ai"
-
       - name: Update image.tag in values.yaml
         run: |
           cd second-repo
@@ -83,35 +78,30 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
-      - name: Check Authenticated User
+      - uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: 1172473
+          private-key: ${{ secrets.CI_CD_SECRET }}
+          owner: owner
+          repositories: repo
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate-token.outputs.token }} # necessary if the repo is private
+          repository: owner/repo
+
+      - name: Commit and Push Changes
         run: |
-          gh auth status
-          git config --get remote.origin.url
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          cd second-repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add ci-cd-test/values.yaml
+          git commit -m "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}" || echo "No changes to commit"
+          git push origin alpha
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}"
-          title: "Automated Update: image.tag to ${{ steps.tag_version.outputs.new_tag }}"
-          body: "This PR updates the image tag to `${{ steps.tag_version.outputs.new_tag }}`."
-          branch: ci-cd-update-image-tag
-          delete-branch: true
-          base: alpha
-
-      # - name: Commit and push changes
-      #   run: |
-      #     cd second-repo
-
-      #     NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
-      #     echo "new tag value is ${NEW_TAG}"
-
-      #     git add ci-cd-test/values.yaml
-      #     git commit -m "Updated image.tag to ${NEW_TAG}" || echo "No changes to commit"
-
-      #     # Set the correct authentication URL
-      #     git push origin alpha
-      #   env:
-      #     GIT_ASKPASS: echo "x-access-token:${{ steps.generate-token.outputs.token }}"
