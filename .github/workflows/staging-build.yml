@@ -99,3 +99,10 @@ jobs:
           base: "alpha"
           title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}"
           body: "This PR updates `image.tag` to `${{ steps.tag_version.outputs.new_tag }}` automatically."
+
+      - name: Enable Auto-Merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          pull-request: ${{ steps.create-pr.outputs.pull-request-number }}
+          merge-method: squash  # Options: merge, squash, rebase
