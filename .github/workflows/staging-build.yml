@@ -72,9 +72,9 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}"
-          branch: "update-image-tag"
+          branch: "update-image-tag" # add service name, add commmit hash
           base: "alpha"
-          title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}" # add service name to title
           body: "This PR updates `image.tag` to `${{ steps.tag_version.outputs.new_tag }}` automatically."
 
       - name: Enable Auto-Merge
@@ -84,3 +84,5 @@ jobs:
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
           pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  
+
+# check if there a way can this be made a common boilerplate code
