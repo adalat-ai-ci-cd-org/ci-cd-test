@@ -81,6 +81,9 @@ jobs:
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
+      - name: Store GitHub App Token
+        run: echo "APP_TOKEN=${{ steps.generate-token.outputs.token }}" >> $GITHUB_ENV
+
   create-and-merge-pr:
     runs-on: ubuntu-latest
     needs: update-charts-repo
@@ -99,7 +102,7 @@ jobs:
       - name: Enable Auto-Merge
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ needs.update-charts-repo.outputs.app_token }}
+          token: ${{ env.APP_TOKEN }}
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
           pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  
