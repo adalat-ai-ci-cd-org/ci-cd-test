@@ -11,14 +11,24 @@ permissions:
   pull-requests: write 
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+    # steps other build and push steps as it is test file
+  
+  semver-tagging:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
+      
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
@@ -33,6 +43,12 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
+  update-charts-repo:
+    runs-on: ubuntu-latest
+    needs: semver-tagging
+    outputs:
+      app_token: ${{ steps.generate-token.outputs.token }}
+    steps:
       - name: Install yq
         run: |
           ls -la
@@ -60,27 +76,30 @@ jobs:
       - name: Update image.tag in values.yaml
         run: |
           echo "Current directory: $(pwd)"
-          ls -la ci-cd-test
-          NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
+          NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
           echo "Updating image.tag to ${NEW_TAG}"
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
           cat ci-cd-test/values.yaml  # for debugging
 
+  create-and-merge-pr:
+    runs-on: ubuntu-latest
+    needs: update-charts-repo
+    steps:
       - name: Create Pull Request
         id: create-pr 
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "Updated image.tag to ${{ steps.tag_version.outputs.new_tag }}"
+          commit-message: "Updated image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
           branch: "update-image-tag" # add service name, add commmit hash
           base: "alpha"
-          title: "chore: update image.tag to ${{ steps.tag_version.outputs.new_tag }}" # add service name to title
-          body: "This PR updates `image.tag` to `${{ steps.tag_version.outputs.new_tag }}` automatically."
+          title: "chore: update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}" # add service name to title
+          body: "This PR updates `image.tag` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
 
       - name: Enable Auto-Merge
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ steps.generate-token.outputs.token }}
+          token: ${{ needs.update-charts-repo.outputs.app_token }}
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
           pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  
