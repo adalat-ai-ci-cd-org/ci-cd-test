@@ -55,7 +55,7 @@ jobs:
           echo "Changed files: $CHANGED_FILES"
           
           for path in $(echo "${{ matrix.service.paths }}" | tr " " "\n"); do
-            echo $path
+            echo ${{path}}
             if echo "$CHANGED_FILES" | grep -q "$path"; then
               echo "Changes detected in $path"
               echo "run_update=true" >> $GITHUB_ENV
