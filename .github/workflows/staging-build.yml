@@ -11,16 +11,8 @@ permissions:
   pull-requests: write 
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@main
-    # steps other build and push steps as it is test file
-  
   semver-tagging:
     runs-on: ubuntu-latest
-    needs: build-and-push
     outputs:
       new_tag: ${{ steps.tag_version.outputs.new_tag }}
     steps:
@@ -41,14 +33,36 @@ jobs:
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: "Automated release for ${{ steps.tag_version.outputs.new_tag }}."
 
   update-charts-repo:
     runs-on: ubuntu-latest
     needs: semver-tagging
-    outputs:
-      app_token: ${{ steps.generate-token.outputs.token }}
+    strategy:
+      matrix: 
+        service:
+          - { name: "document-service", paths: "internal/document/** migrations/document/**", values_path: "ci-cd-test/values.yaml" }
     steps:
+      - name: Check if relevant files were changed
+        id: check_changes
+        run: |
+          CHANGED_FILES="$(git diff-tree --no-commit-id --name-only -r ${{ github.event.after }})"
+          echo "Changed files: $CHANGED_FILES"
+          
+          for path in ${{ matrix.service.paths }}; do
+            if echo "$CHANGED_FILES" | grep -q "$path"; then
+              echo "Changes detected in $path"
+              echo "run_update=true" >> $GITHUB_ENV
+              exit 0
+            fi
+          done
+          echo "No relevant changes detected."
+          echo "run_update=false" >> $GITHUB_ENV
+
+      - name: Exit if no relevant changes
+        if: env.run_update == 'false'
+        run: echo "No changes in ${matrix.service.paths}, skipping update."
+
       - name: Install yq
         run: |
           ls -la
@@ -67,6 +81,7 @@ jobs:
           repositories: ci-cd-charts-test
 
       - name: Checkout Second Repo
+        if: env.run_update == 'true'
         uses: actions/checkout@v4
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -74,31 +89,31 @@ jobs:
           ref: alpha 
 
       - name: Update image.tag in values.yaml
+        if: env.run_update == 'true'
         run: |
           echo "Current directory: $(pwd)"
           NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
-          echo "Updating image.tag to ${NEW_TAG}"
-          yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
-          cat ci-cd-test/values.yaml  # for debugging
-
-      - name: Store GitHub App Token
-        run: echo "APP_TOKEN=${{ steps.generate-token.outputs.token }}" >> $GITHUB_ENV
+          echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
+          yq eval -i ".image.tag = \"${NEW_TAG}\"" ${{ matrix.service.values_path }}
+          cat ${{ matrix.service.values_path }}  # for debugging
 
       - name: Create Pull Request
+        if: env.run_update == 'true'
         id: create-pr 
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "Updated image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
-          branch: "update-image-tag" # add service name, add commmit hash
-          base: "alpha"
-          title: "chore: update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}" # add service name to title
-          body: "This PR updates `image.tag` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
+          commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
+          branch: "update-${{ matrix.service.name }}-image-tag-${{ needs.semver-tagging.outputs.new_tag }}" 
+          base: "main"
+          title: "chore: [${{ matrix.service.name }}] update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
+          body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
 
       - name: Enable Auto-Merge
+        if: env.run_update == 'true'
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ env.APP_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
           pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
           merge-method: squash  
