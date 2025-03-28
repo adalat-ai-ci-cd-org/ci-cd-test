@@ -51,10 +51,11 @@ jobs:
       - name: Check if relevant files were changed
         id: check_changes
         run: |
-          CHANGED_FILES="$(git diff-tree --no-commit-id --name-only -r ${{ github.event.after }})"
+          CHANGED_FILES="$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})"
           echo "Changed files: $CHANGED_FILES"
           
-          for path in ${{ matrix.service.paths }}; do
+          for path in $(echo "${{ matrix.service.paths }}" | tr " " "\n"); do
+            echo $path
             if echo "$CHANGED_FILES" | grep -q "$path"; then
               echo "Changes detected in $path"
               echo "run_update=true" >> $GITHUB_ENV
