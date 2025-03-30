@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+          fetch-depth: 2
       
       - name: Bump version and push tag
         id: tag_version
@@ -42,21 +42,26 @@ jobs:
       - name: Log Modified Files Using Git
         run: |
           MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          echo "Modified files: $MODIFIED_FILES"
+          echo "Modified files: $MODIFIED_FILES" 
 
   update-charts-repo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest     
     needs: semver-tagging
     # strategy:
     #   matrix: 
     #     service:
     #       - { name: "document-service", paths: "internal/document/** migrations/document/**", values_path: "ci-cd-test/values.yaml" }
-    if: contains(join(github.event.head_commit.modified, ','), 'internal/document')
+    # if: contains(join(github.event.head_commit.modified, ','), 'internal/document')
     steps:        
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Log Modified Files Using Git
+        run: |
+          MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Modified files: $MODIFIED_FILES" 
 
       # - name: Check if relevant files were changed
       #   id: check_changes
@@ -79,59 +84,59 @@ jobs:
       #   if: env.run_update == 'false'
       #   run: echo "No changes in ${{ matrix.service.paths }}, skipping update."
 
-      - name: Install yq
-        run: |
-          ls -la
-          sudo apt-get update && sudo apt-get install -y jq
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
+#       - name: Install yq
+#         run: |
+#           ls -la
+#           sudo apt-get update && sudo apt-get install -y jq
+#           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+#           sudo chmod +x /usr/local/bin/yq
+#           yq --version
 
-      - name: Generate GitHub App Token
-        uses: actions/create-github-app-token@v1
-        id: generate-token
-        with:
-          app-id: 1172473
-          private-key: ${{ secrets.CI_CD_SECRET }}
-          owner: adalat-ai-ci-cd-org
-          repositories: ci-cd-charts-test
+#       - name: Generate GitHub App Token
+#         uses: actions/create-github-app-token@v1
+#         id: generate-token
+#         with:
+#           app-id: 1172473
+#           private-key: ${{ secrets.CI_CD_SECRET }}
+#           owner: adalat-ai-ci-cd-org
+#           repositories: ci-cd-charts-test
 
-      - name: Checkout Second Repo
-        # if: env.run_update == 'true'
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          repository: adalat-ai-ci-cd-org/ci-cd-charts-test
-          ref: alpha 
+#       - name: Checkout Second Repo
+#         # if: env.run_update == 'true'
+#         uses: actions/checkout@v4
+#         with:
+#           token: ${{ steps.generate-token.outputs.token }}
+#           repository: adalat-ai-ci-cd-org/ci-cd-charts-test
+#           ref: alpha 
 
-      - name: Update image.tag in values.yaml
-        # if: env.run_update == 'true'
-        run: |
-          echo "Current directory: $(pwd)"
-          NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
-          echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
-          yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
-          cat ci-cd-test/values.yaml  # for debugging
+#       - name: Update image.tag in values.yaml
+#         # if: env.run_update == 'true'
+#         run: |
+#           echo "Current directory: $(pwd)"
+#           NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
+#           echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
+#           yq eval -i ".image.tag = \"${NEW_TAG}\"" ci-cd-test/values.yaml
+#           cat ci-cd-test/values.yaml  # for debugging
 
-      - name: Create Pull Request
-        # if: env.run_update == 'true'
-        id: create-pr 
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
-          branch: "update-document-service-image-tag-${{ needs.semver-tagging.outputs.new_tag }}" 
-          base: "main"
-          title: "chore: document-service update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
-          body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
+#       - name: Create Pull Request
+#         # if: env.run_update == 'true'
+#         id: create-pr 
+#         uses: peter-evans/create-pull-request@v7
+#         with:
+#           token: ${{ steps.generate-token.outputs.token }}
+#           commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
+#           branch: "update-document-service-image-tag-${{ needs.semver-tagging.outputs.new_tag }}" 
+#           base: "main"
+#           title: "chore: document-service update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
+#           body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
 
-      - name: Enable Auto-Merge
-        # if: env.run_update == 'true'
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
-          pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
-          merge-method: squash  
+#       - name: Enable Auto-Merge
+#         # if: env.run_update == 'true'
+#         uses: peter-evans/enable-pull-request-automerge@v3
+#         with:
+#           token: ${{ steps.generate-token.outputs.token }}
+#           repository: adalat-ai-ci-cd-org/ci-cd-charts-test 
+#           pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
+#           merge-method: squash  
 
-# check if there a way can this be made a common boilerplate code
+# # check if there a way can this be made a common boilerplate code
