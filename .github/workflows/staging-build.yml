@@ -42,7 +42,7 @@ jobs:
       matrix: 
         service:
           - { name: "document-service", paths: "internal/document", values_path: "ci-cd-test/values.yaml" }
-          - { name: "migrations-service", paths: "internal/document", values_path: "migrations/values.yaml" }
+          - { name: "migrations-service", paths: "migrations/document", values_path: "migrations/values.yaml" }
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v4
