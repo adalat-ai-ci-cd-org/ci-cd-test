@@ -21,7 +21,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Bump version and push tag
+      - name: Bump version and push tag 
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix: 
         service:
-          - { name: "document-service", paths: "internal/document document", values_path: "ci-cd-test/values.yaml" }
+          - { name: "document-service", paths: "internal/document document README.md", values_path: "ci-cd-test/values.yaml" }
           - { name: "migrations-service", paths: "migrations/document", values_path: "migrations/values.yaml" }
     steps:
       - name: Checkout current repo
