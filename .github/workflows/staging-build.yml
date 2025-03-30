@@ -43,6 +43,7 @@ jobs:
         service:
           - { name: "document-service", paths: "internal/document document README.md", values_path: "ci-cd-test/values.yaml" }
           - { name: "migrations-service", paths: "migrations/document", values_path: "migrations/values.yaml" }
+      max-parallel: 1
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v4
