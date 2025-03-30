@@ -46,6 +46,7 @@ jobs:
               - internal/document
               - document
               - README.md
+              - .github
             values_path: ci-cd-test/values.yaml
 
           - name: migrations-service
