@@ -51,12 +51,13 @@ jobs:
     #   matrix: 
     #     service:
     #       - { name: "document-service", paths: "internal/document/** migrations/document/**", values_path: "ci-cd-test/values.yaml" }
-    # if: contains(join(github.event.head_commit.modified, ','), 'internal/document')
+    if: contains(join(github.event.head_commit.modified, ','), 'internal/document')
     steps:        
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 2
   
       - name: Log Modified Files Using Git
         run: |
