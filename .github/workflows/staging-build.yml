@@ -41,7 +41,8 @@ jobs:
     strategy:
       matrix: 
         service:
-          - { name: "document-service", paths: "^internal/document", values_path: "ci-cd-test/values.yaml" }
+          - { name: "document-service", paths: "internal/document", values_path: "ci-cd-test/values.yaml" }
+          - { name: "migrations-service", paths: "internal/document", values_path: "migrations/values.yaml" }
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v4
@@ -59,7 +60,7 @@ jobs:
 
           while IFS= read -r path; do
             echo "Checking path: $path"
-            if echo "$CHANGED_FILES" | grep -q "$path"; then
+            if echo "$CHANGED_FILES" | grep -q "^$path"; then
               echo "Changes detected in $path"
               run_update="true"
             fi
