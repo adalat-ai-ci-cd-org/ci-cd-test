@@ -66,13 +66,13 @@ jobs:
           CHANGED_FILES="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
           echo "Changed files: $CHANGED_FILES"
           
-          run_update=false
+          run_update="false"
 
           echo '${{ toJson(matrix.service.paths) }}' | jq -r '.[]' | while read -r path; do
             echo "Checking path: $path" 
             if echo "$CHANGED_FILES" | grep -q "^$path"; then
               echo "Changes detected in $path"
-              run_update=true
+              run_update="true"
             fi
           done
 
