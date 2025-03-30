@@ -37,6 +37,11 @@ jobs:
 
       - name: Log Modified Files
         run: echo "Modified files, ${{ toJson(github.event.head_commit.modified) }}"
+      
+      - name: Log Modified Files Using Git
+        run: |
+          MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Modified files: $MODIFIED_FILES"
 
   update-charts-repo:
     runs-on: ubuntu-latest
