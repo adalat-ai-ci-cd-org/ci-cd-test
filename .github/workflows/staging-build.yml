@@ -113,7 +113,7 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
           branch: "update-${{ matrix.service.name }}-image-tag-${{ needs.semver-tagging.outputs.new_tag }}" 
-          base: "main"
+          base: alpha
           title: "chore: [${{ matrix.service.name }}] update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
           body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
 
