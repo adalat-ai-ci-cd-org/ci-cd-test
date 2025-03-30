@@ -35,6 +35,9 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: "Automated release for ${{ steps.tag_version.outputs.new_tag }}."
 
+      - name: Log Modified Files
+        run: echo "Modified files, ${{ toJson(github.event.head_commit.modified) }}"
+
   update-charts-repo:
     runs-on: ubuntu-latest
     needs: semver-tagging
@@ -43,10 +46,7 @@ jobs:
     #     service:
     #       - { name: "document-service", paths: "internal/document/** migrations/document/**", values_path: "ci-cd-test/values.yaml" }
     if: contains(join(github.event.head_commit.modified, ','), 'internal/document')
-    steps:
-      - name: Log Modified Files
-        run: echo "Modified files, ${{ toJson(github.event.head_commit.modified) }}"
-        
+    steps:        
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
