@@ -77,6 +77,8 @@ jobs:
           done
 
           echo "run_update=$run_update" >> $GITHUB_ENV
+          export run_update 
+          echo "Final value of run_update: $run_update"
 
       - name: Exit if no relevant changes
         if: env.run_update == 'false'
