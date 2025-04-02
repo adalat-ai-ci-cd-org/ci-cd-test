@@ -117,6 +117,10 @@ jobs:
           echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
           yq eval -i ".image.tag = \"${NEW_TAG}\"" ${{ matrix.service.values_path }}
           cat ${{ matrix.service.values_path }}  # for debugging
+      
+      - name: Get short SHA
+        id: sha
+        run: echo "sha_short=${GITHUB_SHA::10}" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         if: env.run_update == 'true'
@@ -124,11 +128,11 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
-          branch: "update-${{ matrix.service.name }}-image-tag-${{ needs.semver-tagging.outputs.new_tag }}" 
+          commit-message: "Updated ${{ matrix.service.name }} image.tag to ${{ steps.sha.outputs.sha_short }}"
+          branch: "update-${{ matrix.service.name }}-image-tag-${{ steps.sha.outputs.sha_short }}" 
           base: alpha
-          title: "chore: [${{ matrix.service.name }}] update image.tag to ${{ needs.semver-tagging.outputs.new_tag }}"
-          body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ needs.semver-tagging.outputs.new_tag }}` automatically."
+          title: "chore: [${{ matrix.service.name }}] update image.tag to ${{ steps.sha.outputs.sha_short }}"
+          body: "This PR updates `image.tag` in `${{ matrix.service.values_path }}` to `${{ steps.sha.outputs.sha_short }}` automatically."
 
       - name: Enable Auto-Merge
         if: env.run_update == 'true'
