@@ -109,7 +109,7 @@ jobs:
           echo "Current directory: $(pwd)"
           NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
           echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
-          sed -i '' "s|^\(\s*tag:\s*\).*|\1${NEW_TAG}|" "${{ matrix.service.values_path }}"
+          sed -i.bak "s|^\(\s*tag:\s*\).*|\1${NEW_TAG}|" "${{ matrix.service.values_path }}"
           rm "${{ matrix.service.values_path }}.bak"
           cat ${{ matrix.service.values_path }}  # for debugging
       
