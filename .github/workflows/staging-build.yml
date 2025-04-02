@@ -117,7 +117,7 @@ jobs:
           echo "Current directory: $(pwd)"
           NEW_TAG=${{ needs.semver-tagging.outputs.new_tag }}
           echo "Updating ${{ matrix.service.values_path }} image.tag to ${NEW_TAG}"
-          yq eval -i ".image.tag = \"${NEW_TAG}\"" ${{ matrix.service.values_path }}
+          yq w -i "${{ matrix.service.values_path }}" image.tag "${NEW_TAG}"
           cat ${{ matrix.service.values_path }}  # for debugging
       
       - name: Get short SHA
