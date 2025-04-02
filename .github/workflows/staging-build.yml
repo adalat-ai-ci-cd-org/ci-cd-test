@@ -86,14 +86,6 @@ jobs:
         if: env.run_update == 'false'
         run: echo "No changes in ${{ matrix.service.paths }}, skipping update."
 
-      - name: Install yq
-        run: |
-          ls -la
-          sudo apt-get update && sudo apt-get install -y jq
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
-
       - name: Generate GitHub App Token
         uses: actions/create-github-app-token@v1
         id: generate-token
