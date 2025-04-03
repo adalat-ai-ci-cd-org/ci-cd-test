@@ -113,7 +113,7 @@ jobs:
 
       - uses: trstringer/manual-approval@v1
         with:
-          secret: ${{ steps.generate-token.outputs.token }}
+          secret: ${{ secrets.MY_PAT_TOKEN }}
           approvers: mura-team
           minimum-approvals: 1
           issue-title: "Deploying v1.3.5 to prod from staging"
