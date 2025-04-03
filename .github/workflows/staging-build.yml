@@ -84,7 +84,7 @@ jobs:
           CHANGED_FILES="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
           echo "Changed files: $CHANGED_FILES"
           
-          run_update="false"
+          run_update="false" 
 
           while IFS= read -r path; do
             echo "Checking path: $path" 
