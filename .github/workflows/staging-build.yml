@@ -9,6 +9,7 @@ permissions:
   contents: write  # Allows creating and pushing tags 
   packages: read
   pull-requests: write 
+  issues: write
 
 jobs:
   # manual-approval:
