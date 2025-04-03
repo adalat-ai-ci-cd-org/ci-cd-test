@@ -113,6 +113,7 @@ jobs:
 
       - uses: trstringer/manual-approval@v1
         with:
+          secret: ${{ steps.generate-token.outputs.token }}
           token: ${{ steps.generate-token.outputs.token }}
           approvers: mura-team
           minimum-approvals: 1
