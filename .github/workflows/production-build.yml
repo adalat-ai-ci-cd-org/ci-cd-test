@@ -2,6 +2,10 @@ name: manual approval workflow 3
 
 on:
   workflow_dispatch:
+   inputs:
+      branch:
+        description: "Branch to deploy from"
+        required: true
 
 permissions:
   contents: write  # Allows creating and pushing tags 
@@ -14,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: production 
     steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          
       - name: Deploy Application
         run: echo "Deploying to productiodasdn.dsads.."
 
