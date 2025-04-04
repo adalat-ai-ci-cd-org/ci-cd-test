@@ -15,7 +15,7 @@ jobs:
     environment: production 
     steps:
       - name: Deploy Application
-        run: echo "Deploying to productiodasdn..."
+        run: echo "Deploying to productiodasdn.dsads.."
 
 # jobs:
 #   # manual-approval:
