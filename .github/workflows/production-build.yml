@@ -3,8 +3,8 @@ name: manual approval workflow 3
 on:
   workflow_dispatch:
    inputs:
-      branch:
-        description: "Branch to deploy from"
+      commit_sha:
+        description: "Commit SHA to deploy"
         required: true
 
 permissions:
@@ -21,10 +21,15 @@ jobs:
       - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
-          
+          ref: ${{ github.ref_name }}
+
+      - name: Checkout specific commit
+        run: |
+          git fetch origin ${{ github.event.inputs.commit_sha }} --depth=1
+          git checkout ${{ github.event.inputs.commit_sha }}
+
       - name: Deploy Application
-        run: echo "Deploying to productiodasdn.dsads.."
+        run: echo "🚀 Deploying commit ${{ github.event.inputs.commit_sha }} to production environment..."
 
 # jobs:
 #   # manual-approval:
