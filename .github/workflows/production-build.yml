@@ -21,6 +21,8 @@ jobs:
       - name: Deploy Application
         run: echo "🚀 Deploying commit ${{ github.sha }} to production environment..."
 
+        
+#
 # jobs:
 #   # manual-approval:
 #   #   runs-on: ubuntu-latest
