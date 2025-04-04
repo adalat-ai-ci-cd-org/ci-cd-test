@@ -12,11 +12,6 @@ permissions:
   pull-requests: write 
   issues: write
 
-name: Deploy with Approval
-
-on:
-  
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
