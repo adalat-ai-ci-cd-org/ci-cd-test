@@ -1,9 +1,6 @@
 name: Bump version and update image.tag
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
