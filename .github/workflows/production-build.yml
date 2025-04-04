@@ -145,7 +145,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "${{ needs.semver-tagging.outputs.commit_message }}"
+          commit-message: "[${{ steps.sha.outputs.sha_short }}] ${{ needs.semver-tagging.outputs.commit_message }}"
           branch: "update-${{ matrix.service.name }}-image-tag-${{ steps.sha.outputs.sha_short }}" 
           base: alpha
           title: "chore: [${{ matrix.service.name }}] update image.tag to ${{ steps.sha.outputs.sha_short }}"
