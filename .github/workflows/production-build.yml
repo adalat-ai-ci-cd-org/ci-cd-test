@@ -1,7 +1,8 @@
-name: Bump version and update image.tag
+name: manual approval workflow
 
 on:
   workflow_dispatch:
+      - main
 
 permissions:
   contents: write  # Allows creating and pushing tags 
@@ -12,10 +13,11 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production 
     steps:
       - name: Deploy Application
         run: echo "Deploying to production..."
-   
+
 # jobs:
 #   # manual-approval:
 #   #   runs-on: ubuntu-latest
