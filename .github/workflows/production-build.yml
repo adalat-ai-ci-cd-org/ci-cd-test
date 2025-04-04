@@ -1,4 +1,4 @@
-name: manual approval workflow 2
+name: manual approval workflow 3
 
 on:
   workflow_dispatch:
